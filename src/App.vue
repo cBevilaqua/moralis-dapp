@@ -1,17 +1,74 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div v-if="user">
+      <h2>Welcome, {{ user }}</h2>
+      <a href="javascript:void(0)" @click="logout">Logout</a>
+
+      <Purchases />
+    </div>
+    <button v-else @click="login">Login</button>
+
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import Purchases from "@/components/Purchases";
+import config from "@/config";
+
+// https://docs.moralis.io/moralis-server/database/objects
 
 export default {
-  name: 'App',
+  name: "App",
+  data() {
+    return {
+      user: ""
+    }
+  },
   components: {
-    HelloWorld,
+    Purchases,
+  },
+  mounted() {
+    Moralis.start({
+      serverUrl: config.MORALIS_SERVER_URL,
+      appId: config.MORALIS_APP_ID,
+    });
+
+    this.user = this.getLocalUser()
+  },
+  methods: {
+    async login() {
+      let user = Moralis.User.current();
+
+      if (!user) {
+        user  = await Moralis.authenticate({
+          signingMessage: "Log in using Moralis",
+        })
+        this.user = user.get("ethAddress")
+        console.log("logged in ", this.user)
+        this.setLocalUser(this.user)
+      }
+
+      this.user = user.get("ethAddress")
+      this.setLocalUser(this.user)
+    },
+    async logout() {
+      await Moralis.User.logOut();
+      this.user = null
+      this.clearLocalUser()
+    },
+    setLocalUser(user) {
+      localStorage.setItem("dappUser", user)
+    },
+    clearLocalUser() {
+      localStorage.removeItem("dappUser")
+    },
+    getLocalUser() {
+      const user = localStorage.getItem("dappUser")
+      if (user) {
+        return user
+      }
+      return null
+    }
   },
 };
 </script>
