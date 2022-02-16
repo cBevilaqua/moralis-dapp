@@ -4,6 +4,7 @@
       <h2>Welcome, {{ user }}</h2>
       <a href="javascript:void(0)" @click="logout">Logout</a>
 
+      <Balance />
       <Purchases />
     </div>
     <button v-else @click="login">Login</button>
@@ -12,20 +13,22 @@
 </template>
 
 <script>
-import Purchases from "@/components/Purchases";
-import config from "@/config";
+import Purchases from '@/components/Purchases';
+import Balance from '@/components/Balance';
+import config from '@/config';
 
 // https://docs.moralis.io/moralis-server/database/objects
 
 export default {
-  name: "App",
+  name: 'App',
   data() {
     return {
-      user: ""
-    }
+      user: '',
+    };
   },
   components: {
     Purchases,
+    Balance,
   },
   mounted() {
     Moralis.start({
@@ -33,42 +36,44 @@ export default {
       appId: config.MORALIS_APP_ID,
     });
 
-    this.user = this.getLocalUser()
+    this.user = this.getLocalUser();
   },
   methods: {
     async login() {
       let user = Moralis.User.current();
+      console.log("current user: ", user)
 
       if (!user) {
-        user  = await Moralis.authenticate({
-          signingMessage: "Log in using Moralis",
-        })
-        this.user = user.get("ethAddress")
-        console.log("logged in ", this.user)
-        this.setLocalUser(this.user)
+        user = await Moralis.authenticate({
+          signingMessage: 'Log in using Moralis',
+        });
+        console.log("auth user: ", user)
+        this.user = user.get('ethAddress');
+        console.log('logged in ', this.user);
+        this.setLocalUser(this.user);
       }
 
-      this.user = user.get("ethAddress")
-      this.setLocalUser(this.user)
+      this.user = user.get('ethAddress');
+      this.setLocalUser(this.user);
     },
     async logout() {
       await Moralis.User.logOut();
-      this.user = null
-      this.clearLocalUser()
+      this.user = null;
+      this.clearLocalUser();
     },
     setLocalUser(user) {
-      localStorage.setItem("dappUser", user)
+      localStorage.setItem('dappUser', user);
     },
     clearLocalUser() {
-      localStorage.removeItem("dappUser")
+      localStorage.removeItem('dappUser');
     },
     getLocalUser() {
-      const user = localStorage.getItem("dappUser")
+      const user = localStorage.getItem('dappUser');
       if (user) {
-        return user
+        return user;
       }
-      return null
-    }
+      return null;
+    },
   },
 };
 </script>

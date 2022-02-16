@@ -1,5 +1,5 @@
-import Purchase from "./Purchase"
+import Purchase from './Purchase';
 
 export {
   Purchase,
-}
+};

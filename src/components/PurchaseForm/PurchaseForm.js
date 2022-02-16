@@ -1,22 +1,21 @@
-import { PurchaseService } from "@/services"
+import { PurchaseService } from '@/services';
 
 export default {
-  name: "PurchaseForm",
+  name: 'PurchaseForm',
   data() {
     return {
       purchaseService: new PurchaseService(),
-      value: 100
-    }
+      value: 100,
+    };
   },
   methods: {
     async buy() {
-      const user = Moralis.User.current()
+      const user = Moralis.User.current();
 
       if (user && this.value) {
-        const purchase = await this.purchaseService.save(user.id, this.value)
-        this.$emit("save", purchase)
+        const purchase = await this.purchaseService.save(user.id, this.value);
+        this.$emit('save', purchase);
       }
-
-    }
-  }
-}
+    },
+  },
+};
